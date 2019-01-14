@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "-------------------------PROGRAM START-------------------------"
-strace -o trace.log /go/bin/app
+strace -T -o trace.log /go/bin/app
 echo "--------------------------PROGRAM END--------------------------"
 echo "-------------------------SYSCALL START-------------------------"
 cat trace.log
