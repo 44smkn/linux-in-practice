@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	nloopForEstimation = 1000000000
+	nloopForEstimation = 10000000000
 	nsecsPerMsec       = 1000000
 )
 
@@ -28,14 +28,14 @@ func load(nloop uint64) {
 	}
 }
 
-func childFn(id int, buf []time.Time, nrecord int, nLoopPerResol uint64, start time.Time) {
+func childFn(buf []time.Time, nrecord int, nLoopPerResol uint64, start time.Time) {
 	for i := 0; i < nrecord; i++ {
 		load(nLoopPerResol)
 		buf[i] = time.Now()
 	}
 	for i := 0; i < nrecord; i++ {
 		diff := buf[i].Sub(start).Nanoseconds()
-		fmt.Printf("%v\t%v\t%v\n", id, diff/nsecsPerMsec, (i+1)*100/nrecord)
+		fmt.Printf("%v\t%v\t%v\n", os.Getpid(), diff/nsecsPerMsec, (i+1)*100/nrecord)
 	}
 	os.Exit(0)
 }
@@ -69,15 +69,19 @@ func main() {
 	nLoopPerResol := loopsPerMsec() * uint64(resol)
 	fmt.Println("end estimation")
 
-	//pids := make([]uintptr, nproc)
+	ppid := os.Getpid()
 	start := time.Now()
-
-	for i := 0; i < nproc; i++ {
-		ppid, pid, _ := syscall.RawSyscall(syscall.SYS_FORK, 0, 0, 0)
-		if ppid == 0 {
-			childFn(i, logbuf, nrecord, nLoopPerResol, start)
-		} else if pid == 0 {
-			time.Sleep(time.Duration(2*total) * time.Millisecond)
+	for i := 0; i < nproc; i++ { 
+		if os.Getpid() == ppid {
+			syscall.RawSyscall(syscall.SYS_FORK, 0, 0, 0)
 		}
 	}
+	
+	fmt.Println("pid is", os.Getpid(), "ppid is", os.Getppid())
+	if os.Getpid() != ppid {
+		childFn(logbuf, nrecord, nLoopPerResol, start)
+	} else  {
+		syscall.RawSyscall(syscall.SYS_WAIT4, 0, 0, 0)
+	}
+	
 }

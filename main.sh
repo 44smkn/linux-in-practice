@@ -30,7 +30,6 @@ cp -f ${BASE_DIR}/go.mod ${TARGET_DIR}
 TAG=$(echo ${VALUE_D} | awk -F'[/]' '{print $2}')
 docker build -t linux-in-practice:${TAG} ${TARGET_DIR}/ > /dev/null
 docker run --rm --cap-add=SYS_PTRACE --security-opt="seccomp=unconfined" linux-in-practice:${TAG}
-docker rmi linux-in-practice:${TAG} > /dev/null
 rm ${TARGET_DIR}/Dockerfile
 rm ${TARGET_DIR}/go.mod
 
