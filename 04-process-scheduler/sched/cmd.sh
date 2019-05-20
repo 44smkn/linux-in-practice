@@ -4,7 +4,7 @@
 # 時間はミリ秒単位
 
 echo "1プロセスのみ使用した時の計測"
-#taskset -c 0 /go/bin/app 1 100 1
+taskset -c 0 /go/bin/app 1 100 1
 
 echo "2プロセスを使用した時の計測"
 taskset -c 0 /go/bin/app 2 100 1
